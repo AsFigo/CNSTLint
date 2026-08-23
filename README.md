@@ -1,90 +1,118 @@
 # CNSTLint
 
-Linter for SystemVerilog Constraints. Following the philosophy of BYOL - Build Your Own Linter, CNSTLint is an example of how users can roll out their own linters!
+**CNSTLint** is an open-source, minimalist linter designed to enforce correctness and style rules for SystemVerilog constraint blocks (`rand`, `constraint`).
 
-**CNSTLint** is an open-source **minimalist** linter tool designed to enforce style and correctness rules for SystemVerilog constraint blocks. It provides a framework for **Build Your Own Linter** (**BYOL**), allowing users to create their own custom lint rules while benefiting from built-in checks such as operator precedence, soft constraint placement, distribution operator choice, missing casts, and other constraint best practices.
+Built on the philosophy of **BYOL** (**Build Your Own Linter**), CNSTLint demonstrates how verification engineers can roll out custom static analysis rules using Python and Google's [Verible](https://github.com/chipsalliance/verible) parser.
+
+---
+
+## Table of Contents
+
+1. [BYOL - Build Your Own Linter](#byol---build-your-own-linter)
+2. [Documentation](#documentation)
+3. [Directory Structure](#directory-structure)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [Adding New Lint Rules](#adding-new-lint-rules)
+7. [Dependencies](#dependencies)
+8. [License](#license)
+
+---
 
 ## BYOL - Build Your Own Linter
 
-The core concept of **CNSTLint** is **BYOL** (Build Your Own Linter), a framework that lets you easily define custom linting rules tailored to your specific needs. **CNSTLint** is flexible and extensible.
+The core concept of **CNSTLint** is **BYOL**, a framework that lets you easily define custom linting rules tailored to your team's SystemVerilog constraint standards. Whether detecting missing casts in `sum()`, flagging unsafe soft constraint placement, or enforcing distribution operator correctness, CNSTLint is lightweight and easily extensible.
 
-## Open Source
+---
 
-This project is **open source** and licensed under the MIT License. Contributions are welcome, and you are free to fork, modify, and distribute it according to your needs.
+## Documentation
+
+Full rule reference and API documentation are hosted on GitHub Pages:
+**[CNSTLint Documentation](https://asfigo.github.io/cnstlint/)**
+
+---
+
+## Directory Structure
+
+```text
+CNSTLint/
+├── bin/
+│   ├── cnstlint.py                        # Main executable CLI
+│   └── verible_verilog_syntax.py          # Verible Python bindings
+├── docs/                                  # Sphinx documentation source
+├── examples/                              # Example pass/fail SV files
+│   ├── Makefile
+│   ├── cnst_operator_precedence_f.sv      # Violation example
+│   └── cnst_operator_precedence_p.sv      # Compliant example
+└── src/
+    ├── af_lint_rule.py                    # Base rule class (AsFigoLintRule)
+    ├── asfigo_linter.py                   # Core linter engine
+    └── rules/                             # Constraint lint rules
+        └── af_cnst_*.py / af_func_cnst_*.py
+```
+
+---
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/AsFigo/cnstlint.git
-cd cnstlint
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/AsFigo/cnstlint.git
+   cd cnstlint
+   ```
 
-2. Install required dependencies — Verible mainly
+2. **Install Verible Parser:**
+   CNSTLint requires Google's Verible parser binary (`verible-verilog-syntax`) in your executable path. Download it from the [Verible Releases](https://github.com/chipsalliance/verible/releases).
 
-   See: https://github.com/chipsalliance/verible
+3. **Install Python dependencies:**
+   ```bash
+   pip install anytree tomli
+   pip install -r docs/requirements.txt
+   ```
 
-3. `pip install anytree`
-4. `pip install tomli`
+---
 
 ## Usage
 
-### Running the Linter from Command Line
+Run the linter against a SystemVerilog target file from your project root:
 
 ```bash
-# Single file
-python bin/cnstlint.py -t <path_to_file.sv>
-
-# Filelist
-python bin/cnstlint.py -f <filelist.txt>
-
-# Custom config
-python bin/cnstlint.py -t <path_to_file.sv> -c <config.toml>
+python3 bin/cnstlint.py -t examples/cnst_operator_precedence_f.sv
 ```
 
-### Running the Regression Suite
-
-```bash
-python src/af_cnst_regr_runner.py
-```
-
-Results are saved to `regression_summary.log`.
-
-## Test Cases
-
-Test files follow the naming convention:
-
-- `*_p.sv` — **pass** case: must produce **0 errors**
-- `*_f.sv` — **fail** case: must produce **≥ 1 error**
+---
 
 ## Adding New Lint Rules
 
-1. Create a new Python file inside `src/rules/`. The class must inherit from `AsFigoLintRule`.
-2. Set `self.ruleID` in `__init__`.
-3. Implement `apply(self, filePath, data)` using CST traversal via `data.tree.iter_find_all({"tag": "..."})`.
-4. Import the new class in `bin/cnstlint.py`.
-5. Add `*_p.sv` and `*_f.sv` test cases in `tests/`.
+1. Create a new Python file inside `src/rules/` (e.g., `af_cnst_my_rule.py`).
+2. Class structure should inherit from `AsFigoLintRule`:
 
-## Built-in Rules
+```python
+from af_lint_rule import AsFigoLintRule
 
-| Rule ID | File | Description |
-|---------|------|-------------|
-| `AF_CNST_NO_SOFT_FOREACH` | `af_cnst_no_soft_foreach.py` | Detects `soft` constraint inside `foreach` block |
-| `FUNC_CNST_WRONG_OPER_PRE` | `af_func_cnst_wrong_oper_pre.py` | Mixed operator precedence (`==` with `?:`) in constraint expressions |
-| `FUNC_CNST_MISSING_CAST` | `af_func_cnst_missing_cast.py` | `sum()` array reduction in a constraint missing explicit cast |
-| `FUNC_CNST_DIST_COL_EQ` | `af_func_cnst_dist_col_eq.py` | Constant `dist` range using `:=` with a large span |
-| `FUNC_CNST_DIST_COL_SL` | `af_func_cnst_dist_col_sl.py` | Interval `[a:b]` in `dist` should use `:/` instead of `:=` |
+class MyCustomRule(AsFigoLintRule):
+    """AF_CNST_CUSTOM_001: Description of your custom rule."""
+
+    def apply(self, filePath: str, data):
+        # Rule check logic using Verible AST data
+        pass
+```
+
+3. Add a corresponding entry in `docs/source/rules.rst` documenting the rule rationale, violation example, correct usage, and severity.
+
+---
 
 ## Dependencies
 
-- Python 3.x
-- [Verible](https://github.com/chipsalliance/verible) — SystemVerilog parser from Google/ChipsAlliance
-- `anytree`
-- `tomli`
+* **Python**: 3.8+
+* **Verible Parser**: [`verible-verilog-syntax`](https://github.com/chipsalliance/verible) executable
+* **Python Packages**: `anytree`, `tomli`, `sphinx`, `furo` (for docs)
+
+---
 
 ## License
 
-This project is **open source** and licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is open-source and licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
