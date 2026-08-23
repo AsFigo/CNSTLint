@@ -10,21 +10,10 @@ copyright = "2026, AsFigo, UK"
 author = "Srinivasan Venkataramanan, Ajeetha Kumari Venkatesan"
 
 extensions = [
-    "sphinx.ext.autodoc",  # Pulls docstrings from Python modules
-    "sphinx.ext.napoleon",  # Supports Google/NumPy style docstrings
-    "myst_parser",          # Allows mixing Markdown (.md) and reST (.rst)
+    "myst_parser",  # Allows mixing Markdown (.md) and reST (.rst)
 ]
-
-# Configure autodoc defaults
-autodoc_default_options = {
-    "members": True,
-    "undoc-members": True,
-    "exclude-members": "apply, lvMsg",  # Explicitly hide internal methods/attrs
-    "show-inheritance": True,
-}
-
-autodoc_docstring_signature = True
 
 # Theme settings
 html_theme = "furo"
 html_title = "CNSTLint Documentation"
+html_js_files = ["new_tab_links.js"]
