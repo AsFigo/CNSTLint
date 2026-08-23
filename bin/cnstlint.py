@@ -19,6 +19,21 @@ from rules.af_func_cnst_wrong_oper_pre import FuncCnstWrongOperPre
 from rules.af_func_cnst_missing_cast import FuncCnstMissingCast
 from rules.af_func_cnst_dist_col_eq import FuncCnstDistColEq
 from rules.af_func_cnst_dist_col_sl import FuncCnstDistColSl
+from rules.af_cnst_additive_overflow import CnstAdditiveOverflowInBound
+from rules.af_cnst_dist_no_solve_before import CnstDistNoSolveBefore
+from rules.af_cnst_dist_on_enum import CnstDistOnEnumType
+from rules.af_cnst_foreach_unguarded_prev import CnstForeachUnguardedPrevIdx
+from rules.af_cnst_name_convention import CnstNameConvention
+from rules.af_cnst_no_enum_in_with import CnstNoEnumInWithClause
+from rules.af_cnst_no_locator import CnstNoLocatorInConstraint
+from rules.af_cnst_no_struct_sum import CnstNoStructSumWith
+from rules.af_cnst_rand_class_handle import CnstRandClassHandleArray
+from rules.af_cnst_rand_mode_leftover import CnstRandModeLeftover
+from rules.af_cnst_rand_no_logic import CnstRandNoLogic
+from rules.af_cnst_randc_dyn_excl import CnstRandcDynamicExclusion
+from rules.af_cnst_sum_narrow_no_cast import CnstSumNarrowNoCast
+from rules.af_cnst_unique_large_arr import CnstUniqueLargeArray
+from rules.af_cnst_unique_row_slice import CnstUniqueRowSlice
 
 
 class CNSTLinter(AsFigoLinter):
